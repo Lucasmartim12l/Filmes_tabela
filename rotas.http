@@ -1,0 +1,26 @@
+GET http://localhost:3067
+
+###
+POST http://localhost:3067/create
+Content-Type: application/json
+
+{
+    "title": "Homem-Aranha: Um Novo Dia",
+    "gender": "Ação / Aventura",
+    "duration": 144,
+    "ageRating": 12
+}
+
+###
+DELETE http://localhost:3067/delete/12
+
+###
+PUT http://localhost:3067/update/2
+Content-Type: application/json
+
+{
+    "title": "O Hobbit",
+    "gender": "Comédia Romântica",
+    "duration": 40,
+    "ageRating": 14
+}
