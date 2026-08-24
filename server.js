@@ -4,7 +4,6 @@ import cors from "cors"
 
 const app = express()
 
-// CRUD => Create, Read, Update, Delete
 
 app.use(express.json())
 app.use(cors())
@@ -76,7 +75,7 @@ app.put("/update/:id", async (request, response) => {
 })
 
 app.listen(3067, () => {
-    console.log("Servidor rodando na porta 67")
+    console.log("Servidor rodando")
 })
 
 const sql = mysql2.createPool({

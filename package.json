@@ -1,10 +1,10 @@
 {
-  "name": "Tabela de Filmes",
+  "name": "atividade-filme",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +14,14 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "mysql2": "^3.23.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lucasmartim12l/Filmes_tabela.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lucasmartim12l/Filmes_tabela/issues"
+  },
+  "homepage": "https://github.com/Lucasmartim12l/Filmes_tabela#readme",
+  "description": ""
 }
