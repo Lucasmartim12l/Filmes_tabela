@@ -60,7 +60,7 @@ app.put("/update/:id", async (request, response) => {
     const { id } = request.params
     const { title, gender, duration, ageRating } = request.body
 
-    const updateCommand = "UPDATE filmes_LucasMartim SET title = ?, gender = ?, duration = ?, ageRating = ? WHERE id = ?"
+    const updateCommand = "UPDATE filmes_LucasMartim SET nome = ?, genero = ?, duracao = ?, classific_et = ? WHERE id = ?"
 
         sql.query(updateCommand, [title, gender, duration, ageRating, id], (error) => {
             if (error) {
