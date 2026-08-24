@@ -24,7 +24,7 @@ app.get("/", (request, response) => {
 app.post("/create", (request, response) => {
     const { title, gender, duration, ageRating } = request.body
 
-    const insertCommand = "INSERT INTO filmes_LucasMartim(title, gender, duration, ageRating) VALUES (?, ?, ?, ?)"
+    const insertCommand = "INSERT INTO filmes_LucasMartim(nome, genero, duracao, classific_et) VALUES (?, ?, ?, ?)"
 
     sql.query(insertCommand, [title, gender, duration, ageRating], (error) => {
         if (error) {
