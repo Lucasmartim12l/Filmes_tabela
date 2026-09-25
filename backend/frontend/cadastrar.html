@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cadastrar filme</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="pagina">
+    <a class="voltar" href="index.html">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+      Voltar para a lista
+    </a>
+
+    <h1 class="titulo">Cadastrar filme</h1>
+
+    <form class="formulario" id="form-filme" autocomplete="off">
+      <div class="campo">
+        <label for="nome">Nome do filme</label>
+        <input class="entrada" id="nome" name="nome" type="text" required autofocus>
+      </div>
+
+      <div class="campo">
+        <label for="genero">Gênero</label>
+        <input class="entrada" id="genero" name="genero" type="text" list="generos" required>
+        <datalist id="generos">
+          <option value="Ação"></option>
+          <option value="Animação"></option>
+          <option value="Aventura"></option>
+          <option value="Comédia"></option>
+          <option value="Comédia romântica"></option>
+          <option value="Documentário"></option>
+          <option value="Drama"></option>
+          <option value="Fantasia"></option>
+          <option value="Ficção científica"></option>
+          <option value="Musical"></option>
+          <option value="Romance"></option>
+          <option value="Suspense"></option>
+          <option value="Terror"></option>
+        </datalist>
+      </div>
+
+      <div class="campo">
+        <label for="duracao">Duração em minutos</label>
+        <input class="entrada entrada--curta" id="duracao" name="duracao" type="number" min="1" step="1" inputmode="numeric" required>
+      </div>
+
+      <div class="campo">
+        <label for="classific_et">Classificação indicativa</label>
+        <div class="classificacao">
+          <input class="entrada entrada--curta" id="classific_et" name="classific_et" type="number" min="0" step="1" inputmode="numeric" required aria-describedby="ajuda-classificacao">
+          <span class="selo" id="previa" role="img" aria-hidden="true"></span>
+        </div>
+        <div class="faixas" role="group" aria-label="Faixas mais comuns">
+          <button type="button" class="faixa" data-idade="0">Livre</button>
+          <button type="button" class="faixa" data-idade="10">10</button>
+          <button type="button" class="faixa" data-idade="12">12</button>
+          <button type="button" class="faixa" data-idade="14">14</button>
+          <button type="button" class="faixa" data-idade="16">16</button>
+          <button type="button" class="faixa" data-idade="18">18</button>
+        </div>
+        <p class="ajuda" id="ajuda-classificacao">Idade mínima em anos. Use 0 para livre.</p>
+      </div>
+
+      <p class="erro" id="erro-form" role="alert" hidden></p>
+
+      <div class="acoes-form">
+        <button class="botao" type="submit" id="enviar">Cadastrar filme</button>
+        <a class="botao botao--secundario" href="index.html">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+  <script>
+    const form = document.getElementById("form-filme")
+    const erroForm = document.getElementById("erro-form")
+    const enviar = document.getElementById("enviar")
+
+    iniciarClassificacao(form)
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault()
+
+      enviar.disabled = true
+      enviar.textContent = "Cadastrando..."
+      erroForm.hidden = true
+
+      try {
+        await filmesApi.criar(lerFormulario(form))
+        location.href = "index.html?aviso=cadastrado"
+      } catch (erro) {
+        erroForm.textContent = erro.message
+        erroForm.hidden = false
+        enviar.disabled = false
+        enviar.textContent = "Cadastrar filme"
+      }
+    })
+  </script>
+</body>
+</html>

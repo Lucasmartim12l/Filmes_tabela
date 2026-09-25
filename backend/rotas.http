@@ -1,0 +1,26 @@
+GET http://localhost:3067
+
+###
+POST http://localhost:3067/create
+Content-Type: application/json
+
+{
+    "nome": "Assombra Gus",
+    "genero": "Terror / Gustavo",
+    "duracao": 130,
+    "classific_et": 67
+}
+
+###
+DELETE http://localhost:3067/delete/12
+
+###
+PUT http://localhost:3067/update/2
+Content-Type: application/json
+
+{
+    "title": "O Hobbit",
+    "gender": "Comédia Romântica",
+    "duration": 40,
+    "ageRating": 14
+}

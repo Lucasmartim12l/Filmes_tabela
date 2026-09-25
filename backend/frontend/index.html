@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filmes</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/frontend/style (2).css">
+</head>
+<body>
+  <main class="pagina">
+    <header class="cabecalho">
+      <div>
+        <h1 class="titulo" tabindex="-1">Filmes</h1>
+        <p class="subtitulo" id="contagem" aria-live="polite"></p>
+      </div>
+      <a class="botao" href="cadastrar.html">Cadastrar filme</a>
+    </header>
+
+    <section class="painel" id="painel" aria-label="Lista de filmes"></section>
+  </main>
+
+  <dialog class="dialogo" id="dialogo-apagar" aria-labelledby="titulo-apagar">
+    <h2 id="titulo-apagar">Apagar este filme?</h2>
+    <p class="dialogo__texto"><strong id="nome-apagar"></strong> será removido da lista. Essa ação não pode ser desfeita.</p>
+    <p class="erro" id="erro-apagar" role="alert" hidden></p>
+    <div class="dialogo__acoes">
+      <button type="button" class="botao botao--secundario" id="cancelar-apagar">Cancelar</button>
+      <button type="button" class="botao botao--perigo" id="confirmar-apagar">Apagar filme</button>
+    </div>
+  </dialog>
+
+  <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+  <script>
+    const painel = document.getElementById("painel")
+    const contagem = document.getElementById("contagem")
+    const dialogo = document.getElementById("dialogo-apagar")
+    const nomeApagar = document.getElementById("nome-apagar")
+    const erroApagar = document.getElementById("erro-apagar")
+    const confirmar = document.getElementById("confirmar-apagar")
+    const cancelar = document.getElementById("cancelar-apagar")
+
+    // Filme e linha que estão esperando confirmação para serem apagados
+    let selecionado = null
+
+    // ---------- Lista ----------
+
+    async function carregar() {
+      contagem.textContent = ""
+      painel.replaceChildren(criarEstado(null, "Carregando filmes..."))
+
+      try {
+        const filmes = await filmesApi.listar()
+        renderizar(filmes)
+      } catch (erro) {
+        const tentar = criarBotao("Tentar de novo", "botao", carregar)
+        painel.replaceChildren(criarEstado("Não foi possível carregar os filmes", erro.message, tentar))
+      }
+    }
+
+    function atualizarContagem(total) {
+      if (total === 0) contagem.textContent = "Nenhum filme cadastrado"
+      else contagem.textContent = total === 1 ? "1 filme cadastrado" : `${total} filmes cadastrados`
+    }
+
+    function renderizar(filmes) {
+      atualizarContagem(filmes.length)
+
+      if (filmes.length === 0) {
+        const cadastrar = criarLink("Cadastrar filme", "cadastrar.html", "botao")
+        painel.replaceChildren(criarEstado("Nenhum filme por aqui", "Cadastre o primeiro filme para ele aparecer na lista.", cadastrar))
+        return
+      }
+
+      const lista = document.createElement("ul")
+      lista.className = "lista"
+      filmes.forEach((filme) => lista.append(criarLinha(filme)))
+      painel.replaceChildren(lista)
+    }
+
+    function criarLinha(filme) {
+      const linha = document.createElement("li")
+      linha.className = "filme"
+
+      const titulo = document.createElement("h2")
+      titulo.className = "filme__titulo"
+      titulo.textContent = filme.nome
+
+      const genero = document.createElement("p")
+      genero.className = "filme__genero"
+      genero.textContent = filme.genero
+
+      const info = document.createElement("div")
+      info.className = "filme__info"
+      info.append(titulo, genero)
+
+      const duracao = document.createElement("p")
+      duracao.className = "filme__duracao"
+      duracao.textContent = formatarDuracao(filme.duracao)
+
+      const editar = criarLink("Editar", `editar.html?id=${encodeURIComponent(filme.id)}`, "botao botao--secundario botao--pequeno")
+      editar.setAttribute("aria-label", `Editar ${filme.nome}`)
+
+      const apagar = criarBotao("Apagar", "botao botao--perigo-suave botao--pequeno", () => pedirConfirmacao(filme, linha))
+      apagar.setAttribute("aria-label", `Apagar ${filme.nome}`)
+
+      const acoes = document.createElement("div")
+      acoes.className = "filme__acoes"
+      acoes.append(editar, apagar)
+
+      linha.append(criarSelo(filme.classific_et), info, duracao, acoes)
+      return linha
+    }
+
+    // ---------- Apagar ----------
+
+    function pedirConfirmacao(filme, linha) {
+      selecionado = { filme, linha }
+      nomeApagar.textContent = filme.nome
+      erroApagar.hidden = true
+      confirmar.disabled = false
+      confirmar.textContent = "Apagar filme"
+      dialogo.showModal()
+    }
+
+    cancelar.addEventListener("click", () => dialogo.close())
+
+    confirmar.addEventListener("click", async () => {
+      const { filme, linha } = selecionado
+
+      confirmar.disabled = true
+      confirmar.textContent = "Apagando..."
+      erroApagar.hidden = true
+
+      try {
+        await filmesApi.apagar(filme.id)
+        dialogo.close()
+        removerLinha(linha)
+        mostrarAviso("Filme apagado")
+      } catch (erro) {
+        erroApagar.textContent = erro.message
+        erroApagar.hidden = false
+        confirmar.disabled = false
+        confirmar.textContent = "Apagar filme"
+      }
+    })
+
+    function removerLinha(linha) {
+      function finalizar() {
+        linha.remove()
+        const restantes = painel.querySelectorAll(".filme").length
+        if (restantes === 0) renderizar([])
+        else atualizarContagem(restantes)
+        document.querySelector(".titulo").focus()
+      }
+
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        finalizar()
+        return
+      }
+
+      linha.classList.add("filme--saindo")
+      setTimeout(finalizar, 250)
+    }
+
+    // ---------- Aviso vindo de outra página ----------
+
+    const avisos = { cadastrado: "Filme cadastrado", salvo: "Alterações salvas" }
+    const textoAviso = avisos[new URLSearchParams(location.search).get("aviso")]
+
+    if (textoAviso) {
+      mostrarAviso(textoAviso)
+      try {
+        history.replaceState(null, "", "index.html")
+      } catch (erro) {
+        // Alguns navegadores bloqueiam isso ao abrir o arquivo direto do disco.
+      }
+    }
+
+    carregar()
+  </script>
+</body>
+</html>

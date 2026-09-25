@@ -1,0 +1,485 @@
+/* ==========================================================
+   Filmes — estilos compartilhados
+   A única cor forte da interface são as faixas de classificação
+   indicativa (L, 10, 12, 14, 16, 18). O resto fica em tons neutros.
+   ========================================================== */
+
+:root {
+  --tela: #eceff3;
+  --papel: #ffffff;
+  --tinta: #17202e;
+  --suave: #556072;
+  --linha: #d3d9e1;
+  --borda-campo: #8a94a4;
+  --perigo: #b42318;
+  --foco: #1d5fd1;
+
+  --faixa-L: #009b4d;
+  --faixa-10: #0072bc;
+  --faixa-12: #ffc20e;
+  --faixa-14: #f58220;
+  --faixa-16: #ed1c24;
+  --faixa-18: #10151d;
+
+  --fonte-titulo: "Big Shoulders Display", "Arial Narrow", Arial, sans-serif;
+  --fonte-texto: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--tela);
+  color: var(--tinta);
+  font: 400 1rem/1.55 var(--fonte-texto);
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+/* ---------- Estrutura da página ---------- */
+
+.pagina {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: 1.75rem;
+}
+
+.titulo {
+  font: 800 clamp(2.75rem, 7vw, 4.25rem) / 0.92 var(--fonte-titulo);
+  letter-spacing: 0.005em;
+}
+
+.titulo:focus {
+  outline: none;
+}
+
+.subtitulo {
+  margin-top: 0.5rem;
+  color: var(--suave);
+}
+
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  color: var(--suave);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.voltar:hover {
+  color: var(--tinta);
+  text-decoration: underline;
+}
+
+/* ---------- Botões ---------- */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.15rem;
+  border: 1px solid var(--tinta);
+  border-radius: 6px;
+  background: var(--tinta);
+  color: #ffffff;
+  font: 600 1rem/1.2 var(--fonte-texto);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: #27344a;
+}
+
+.botao:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.botao.botao--secundario {
+  background: var(--papel);
+  border-color: var(--borda-campo);
+  color: var(--tinta);
+}
+
+.botao.botao--secundario:hover {
+  background: #f5f7fa;
+}
+
+.botao.botao--perigo {
+  background: var(--perigo);
+  border-color: var(--perigo);
+  color: #ffffff;
+}
+
+.botao.botao--perigo:hover {
+  background: #8f1d14;
+}
+
+.botao.botao--perigo-suave {
+  background: var(--papel);
+  border-color: #e0a8a2;
+  color: var(--perigo);
+}
+
+.botao.botao--perigo-suave:hover {
+  background: #fdf1f0;
+}
+
+.botao.botao--pequeno {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.9375rem;
+}
+
+/* ---------- Selo de classificação indicativa ---------- */
+
+.selo {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 6px;
+  background: var(--suave);
+  color: #ffffff;
+  font: 800 2rem / 1 var(--fonte-titulo);
+}
+
+.selo[data-faixa="L"] {
+  background: var(--faixa-L);
+}
+.selo[data-faixa="10"] {
+  background: var(--faixa-10);
+}
+.selo[data-faixa="12"] {
+  background: var(--faixa-12);
+  color: var(--tinta);
+}
+.selo[data-faixa="14"] {
+  background: var(--faixa-14);
+  color: var(--tinta);
+}
+.selo[data-faixa="16"] {
+  background: var(--faixa-16);
+}
+.selo[data-faixa="18"] {
+  background: var(--faixa-18);
+}
+.selo[data-faixa="sem"] {
+  background: #dce1e8;
+  color: var(--suave);
+}
+
+/* ---------- Lista de filmes ---------- */
+
+.painel {
+  overflow: hidden;
+  border: 1px solid var(--linha);
+  border-radius: 8px;
+  background: var(--papel);
+}
+
+.painel .estado {
+  padding: 3rem 1.5rem;
+}
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filme {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) 6.5rem auto;
+  grid-template-areas: "selo info duracao acoes";
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding: 1.1rem 1.25rem;
+}
+
+.filme + .filme {
+  border-top: 1px solid var(--linha);
+}
+
+.filme .selo {
+  grid-area: selo;
+}
+
+.filme__info {
+  grid-area: info;
+  min-width: 0;
+}
+
+.filme__titulo {
+  font: 700 1.75rem / 1.05 var(--fonte-titulo);
+  overflow-wrap: anywhere;
+}
+
+.filme__genero {
+  margin-top: 0.2rem;
+  color: var(--suave);
+  overflow-wrap: anywhere;
+}
+
+.filme__duracao {
+  grid-area: duracao;
+  color: var(--suave);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.filme__acoes {
+  grid-area: acoes;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filme--saindo {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+@media (max-width: 40rem) {
+  .filme {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    grid-template-areas:
+      "selo info"
+      "selo duracao"
+      ". acoes";
+    gap: 0.35rem 1rem;
+  }
+
+  .filme .selo {
+    align-self: start;
+  }
+
+  .filme__duracao {
+    text-align: left;
+  }
+
+  .filme__acoes {
+    margin-top: 0.5rem;
+  }
+}
+
+/* ---------- Estados (carregando, vazio, erro) ---------- */
+
+.estado {
+  max-width: 42rem;
+}
+
+.estado h2 {
+  font: 700 1.75rem / 1.1 var(--fonte-titulo);
+}
+
+.estado p {
+  max-width: 42ch;
+  margin: 0.4rem 0 1.25rem;
+  color: var(--suave);
+}
+
+.estado p:last-child {
+  margin-bottom: 0;
+}
+
+.estado-pagina:not(:empty) {
+  margin-top: 2rem;
+}
+
+/* ---------- Formulário ---------- */
+
+.formulario {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 34rem;
+  margin-top: 2rem;
+}
+
+.campo {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.campo label {
+  font-weight: 600;
+}
+
+.ajuda {
+  color: var(--suave);
+  font-size: 0.9375rem;
+}
+
+.entrada {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--borda-campo);
+  border-radius: 6px;
+  background: var(--papel);
+  color: inherit;
+  font: inherit;
+}
+
+.entrada:focus-visible {
+  border-color: var(--foco);
+  outline-offset: 0;
+}
+
+.entrada.entrada--curta {
+  width: 9rem;
+}
+
+.classificacao {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.faixas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.faixa {
+  min-width: 2.75rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--borda-campo);
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--tinta);
+  font: 600 0.9375rem / 1.2 var(--fonte-texto);
+  cursor: pointer;
+}
+
+.faixa[aria-pressed="true"] {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: #ffffff;
+}
+
+.acoes-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.erro {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0a8a2;
+  border-radius: 6px;
+  background: #fdf1f0;
+  color: #8f1d14;
+}
+
+/* ---------- Confirmação de apagar ---------- */
+
+.dialogo {
+  width: min(26rem, calc(100% - 2rem));
+  padding: 1.5rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow: 0 20px 50px rgba(23, 32, 46, 0.3);
+}
+
+.dialogo::backdrop {
+  background: rgba(23, 32, 46, 0.55);
+}
+
+.dialogo h2 {
+  font: 700 1.75rem / 1.1 var(--fonte-titulo);
+}
+
+.dialogo__texto {
+  margin-top: 0.5rem;
+  color: var(--suave);
+}
+
+.dialogo__texto strong {
+  color: var(--tinta);
+  overflow-wrap: anywhere;
+}
+
+.dialogo .erro {
+  margin-top: 1rem;
+}
+
+.dialogo__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* ---------- Aviso rápido ---------- */
+
+.aviso {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  max-width: calc(100% - 2rem);
+  padding: 0.75rem 1.1rem;
+  border-radius: 6px;
+  background: var(--tinta);
+  color: #ffffff;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 1rem);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.aviso.visivel {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.aviso.aviso--erro {
+  background: var(--perigo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editar filme</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="pagina">
+    <a class="voltar" href="index.html">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+      Voltar para a lista
+    </a>
+
+    <h1 class="titulo">Editar filme</h1>
+
+    <div class="estado-pagina" id="estado"></div>
+
+    <form class="formulario" id="form-filme" autocomplete="off" hidden>
+      <div class="campo">
+        <label for="nome">Nome do filme</label>
+        <input class="entrada" id="nome" name="nome" type="text" required>
+      </div>
+
+      <div class="campo">
+        <label for="genero">Gênero</label>
+        <input class="entrada" id="genero" name="genero" type="text" list="generos" required>
+        <datalist id="generos">
+          <option value="Ação"></option>
+          <option value="Animação"></option>
+          <option value="Aventura"></option>
+          <option value="Comédia"></option>
+          <option value="Comédia romântica"></option>
+          <option value="Documentário"></option>
+          <option value="Drama"></option>
+          <option value="Fantasia"></option>
+          <option value="Ficção científica"></option>
+          <option value="Musical"></option>
+          <option value="Romance"></option>
+          <option value="Suspense"></option>
+          <option value="Terror"></option>
+        </datalist>
+      </div>
+
+      <div class="campo">
+        <label for="duracao">Duração em minutos</label>
+        <input class="entrada entrada--curta" id="duracao" name="duracao" type="number" min="1" step="1" inputmode="numeric" required>
+      </div>
+
+      <div class="campo">
+        <label for="classific_et">Classificação indicativa</label>
+        <div class="classificacao">
+          <input class="entrada entrada--curta" id="classific_et" name="classific_et" type="number" min="0" step="1" inputmode="numeric" required aria-describedby="ajuda-classificacao">
+          <span class="selo" id="previa" role="img" aria-hidden="true"></span>
+        </div>
+        <div class="faixas" role="group" aria-label="Faixas mais comuns">
+          <button type="button" class="faixa" data-idade="0">Livre</button>
+          <button type="button" class="faixa" data-idade="10">10</button>
+          <button type="button" class="faixa" data-idade="12">12</button>
+          <button type="button" class="faixa" data-idade="14">14</button>
+          <button type="button" class="faixa" data-idade="16">16</button>
+          <button type="button" class="faixa" data-idade="18">18</button>
+        </div>
+        <p class="ajuda" id="ajuda-classificacao">Idade mínima em anos. Use 0 para livre.</p>
+      </div>
+
+      <p class="erro" id="erro-form" role="alert" hidden></p>
+
+      <div class="acoes-form">
+        <button class="botao" type="submit" id="salvar">Salvar alterações</button>
+        <a class="botao botao--secundario" href="index.html">Cancelar</a>
+      </div>
+    </form>
+  </main>
+
+  <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+  <script>
+    // O id do filme vem da lista: editar.html?id=3
+    const id = new URLSearchParams(location.search).get("id")
+
+    const form = document.getElementById("form-filme")
+    const estado = document.getElementById("estado")
+    const erroForm = document.getElementById("erro-form")
+    const salvar = document.getElementById("salvar")
+
+    const atualizarClassificacao = iniciarClassificacao(form)
+
+    async function carregar() {
+      form.hidden = true
+      estado.replaceChildren(criarEstado(null, "Carregando filme..."))
+
+      if (!id) {
+        const voltar = criarLink("Voltar para a lista", "index.html", "botao")
+        estado.replaceChildren(criarEstado("Nenhum filme selecionado", "Escolha um filme na lista para editar.", voltar))
+        return
+      }
+
+      try {
+        // O servidor não tem rota para buscar um filme só, então busca a lista e procura pelo id.
+        const filmes = await filmesApi.listar()
+        const filme = filmes.find((f) => String(f.id) === id)
+
+        if (!filme) {
+          const voltar = criarLink("Voltar para a lista", "index.html", "botao")
+          estado.replaceChildren(criarEstado("Filme não encontrado", "Ele pode ter sido apagado. Volte para a lista e escolha outro.", voltar))
+          return
+        }
+
+        form.elements.nome.value = filme.nome ?? ""
+        form.elements.genero.value = filme.genero ?? ""
+        form.elements.duracao.value = filme.duracao ?? ""
+        form.elements.classific_et.value = filme.classific_et ?? ""
+        atualizarClassificacao()
+
+        document.title = `Editar ${filme.nome}`
+        estado.replaceChildren()
+        form.hidden = false
+        form.elements.nome.focus()
+      } catch (erro) {
+        const tentar = criarBotao("Tentar de novo", "botao", carregar)
+        estado.replaceChildren(criarEstado("Não foi possível carregar o filme", erro.message, tentar))
+      }
+    }
+
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault()
+
+      salvar.disabled = true
+      salvar.textContent = "Salvando..."
+      erroForm.hidden = true
+
+      const dados = lerFormulario(form)
+
+      try {
+        // A rota PUT espera title, gender, duration e ageRating
+        await filmesApi.atualizar(id, {
+          title: dados.nome,
+          gender: dados.genero,
+          duration: dados.duracao,
+          ageRating: dados.classific_et,
+        })
+        location.href = "index.html?aviso=salvo"
+      } catch (erro) {
+        erroForm.textContent = erro.message
+        erroForm.hidden = false
+        salvar.disabled = false
+        salvar.textContent = "Salvar alterações"
+      }
+    })
+
+    carregar()
+  </script>
+</body>
+</html>
